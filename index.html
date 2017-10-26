@@ -35,6 +35,8 @@
             var elementSpaceTime = ditTime;
             var characterSpaceTime = 3 * ditTime;
             var wordSpaceTime = 7 * ditTime;
+            var rampUpTime = 0.005;
+            var rampDownTime = 0.005;
 
             function timer(e) {
                 var t = e.playbackTime;
@@ -46,15 +48,19 @@
                     for (var i = 0; i < m.length; i++) {
                         switch(m[i]) {
                             case '.':
-                                amp.gain.setValueAtTime(1, t);
-                                t += ditTime;
                                 amp.gain.setValueAtTime(0, t);
+                                amp.gain.linearRampToValueAtTime(1, t+rampUpTime);
+                                t += ditTime;
+                                amp.gain.setValueAtTime(1, t);
+                                amp.gain.linearRampToValueAtTime(0, t+rampDownTime);
                                 t += elementSpaceTime;
                                 break;
                             case '-':
-                                amp.gain.setValueAtTime(1, t);
-                                t += dahTime;
                                 amp.gain.setValueAtTime(0, t);
+                                amp.gain.linearRampToValueAtTime(1, t+rampUpTime);
+                                t += dahTime;
+                                amp.gain.setValueAtTime(1, t);
+                                amp.gain.linearRampToValueAtTime(0, t+rampDownTime);
                                 t += elementSpaceTime;
                                 break;
                             case ' ':
