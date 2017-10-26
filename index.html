@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>WebCW</title>
+    </head>
+    <body>
+        <textarea rows="10" cols="80"
+            id="input"
+            placeholder="Type here..."></textarea>
+        <script src="https://mohayonao.github.io/web-audio-scheduler/build/web-audio-scheduler.min.js"></script>
+        <script src="morsetab.js"></script>
+        <script>
+            var audio = new AudioContext();
+            var sched = new WebAudioScheduler({ context: audio });
+
+            var morseQueue = [];
+
+            var amp = audio.createGain();
+            amp.gain.value = 0;
+            amp.connect(audio.destination);
+/*
+            amp.gain.setValueAtTime(1, audio.currentTime + 1);
+            amp.gain.setValueAtTime(1, audio.currentTime + 4.993);
+            amp.gain.linearRampToValueAtTime(1e-6, audio.currentTime + 5);
+*/
+            var osc = audio.createOscillator();
+            osc.frequency.value = 670;
+            osc.start(audio.currentTime);
+            osc.connect(amp);
+
+            var ditTime = 0.1;
+            var dahTime = 3 * ditTime;
+            var elementSpaceTime = ditTime;
+            var characterSpaceTime = 3 * ditTime;
+            var wordSpaceTime = 7 * ditTime;
+
+            function timer(e) {
+                var t = e.playbackTime;
+                if (morseQueue.length > 0)
+                    console.log('timer tick, queue=', morseQueue);
+                var c = morseQueue.shift();
+                var m = morseTable[c];
+                if (m) {
+                    for (var i = 0; i < m.length; i++) {
+                        switch(m[i]) {
+                            case '.':
+                                amp.gain.setValueAtTime(1, t);
+                                t += ditTime;
+                                amp.gain.setValueAtTime(0, t);
+                                t += elementSpaceTime;
+                                break;
+                            case '-':
+                                amp.gain.setValueAtTime(1, t);
+                                t += dahTime;
+                                amp.gain.setValueAtTime(0, t);
+                                t += elementSpaceTime;
+                                break;
+                            case ' ':
+                                t += wordSpaceTime;
+                                break;
+                        }
+                    }
+                }
+                t += characterSpaceTime;
+                sched.insert(t, timer);
+            }
+
+            sched.start(timer);
+
+            input = document.getElementById("input");
+            input.addEventListener("keypress", (e) => {
+                morseQueue.push(e.key.toUpperCase());
+            });
+
+        </script>
+    </body>
+</html>
