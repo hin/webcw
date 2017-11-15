@@ -6,9 +6,84 @@
         <title>WebCW</title>
     </head>
     <body>
+      <p>
         <textarea rows="10" cols="80"
             id="input"
-            placeholder="Type here..."></textarea>
+            placeholder="Type here..."></textarea> </p>
+        <table width="700px">
+          <tr>
+            <td>Frequency:</td>
+            <td>
+              <datalist id="fticks">
+                <option value="220" label="220">
+                <option value="330">
+                <option value="440">
+                <option value="550">
+                <option value="660">
+                <option value="770">
+                <option value="880" label="880">
+                <option value="990">
+                <option value="1100">
+                <option value="1210">
+                <option value="1320">
+                <option value="1430">
+                <option value="1540">
+                <option value="1650">
+                <option value="1760" label="1760">
+              </datalist>
+              <font size="2">220 Hz</font>
+              <input type="range" id="freq" min="220" max="1760" value="220" list="fticks" style="width: 400px"/>
+              <font size="2">1760 Hz</font>
+            </td>
+            <td>
+              <input id="fval" value="670" size="6" />
+            </td>
+          </tr>
+          <tr>
+            <td>Speed:</td>
+            <td>
+              <datalist id="sticks">
+                <option value="20" label="20">
+                <option value="30">
+                <option value="40" label="40">
+                <option value="50">
+                <option value="60" label="60">
+                <option value="70">
+                <option value="80" label="80">
+                <option value="90">
+                <option value="100" label="100">
+                <option value="110">
+                <option value="120" label="120">
+                <option value="130">
+                <option value="140" label="140">
+                <option value="150">
+                <option value="160" label="160">
+                <option value="170">
+                <option value="180" label="180">
+                <option value="190">
+                <option value="200" label="200">
+              </datalist>
+              <font size="2">20 t/m</font>
+              <input type="range" id="speed" min="20" max="200" value="20" step="5" list="sticks" style="width: 400px"/>
+              <font size="2">200 t/m</font>
+            </td>
+            <td>
+              <input id="sval" value="40" size="4" />
+            </td>
+          </tr>
+          <tr>
+            <td>Farnsworth:</td>
+            <td>
+              <font size="2">20 t/m</font>
+              <input type="range" id="farnsworth" min="20" max="200" value="20" step="5" list="sticks" style="width: 400px" />
+              <font size="2">200 t/m</font>
+            </td>
+            <td>
+              <input id="fwval" value="40" size="4" />
+            </td>
+          </tr>
+        </table>
+
         <script src="https://mohayonao.github.io/web-audio-scheduler/build/web-audio-scheduler.min.js"></script>
         <script src="morsetab.js"></script>
         <script>
@@ -25,12 +100,29 @@
             amp.gain.setValueAtTime(1, audio.currentTime + 4.993);
             amp.gain.linearRampToValueAtTime(1e-6, audio.currentTime + 5);
 */
+            input = document.getElementById("input");
+            freq = document.getElementById("freq");
+            fval = document.getElementById("fval");
+            speed = document.getElementById("speed");
+            sval = document.getElementById("sval");
+            farnsworth = document.getElementById("farnsworth");
+            fwval = document.getElementById("fwval");
+
             var osc = audio.createOscillator();
-            osc.frequency.value = 670;
+            frequency = 670;
+            osc.frequency.value = frequency;
+            freq.value = frequency;
+            fval.value = frequency;
             osc.start(audio.currentTime);
             osc.connect(amp);
 
-            var ditTime = 0.1;
+            var tempo = 40;
+            speed.value = tempo;
+            sval.value = tempo;
+            var fwtempo = tempo;
+            farnsworth.value = tempo;
+            fwval.value = tempo;
+            var ditTime = 60.0/(tempo*10);
             var dahTime = 3 * ditTime;
             var elementSpaceTime = ditTime;
             var characterSpaceTime = 3 * ditTime;
@@ -75,9 +167,38 @@
 
             sched.start(timer);
 
-            input = document.getElementById("input");
             input.addEventListener("keypress", (e) => {
                 morseQueue.push(e.key.toUpperCase());
+            });
+            freq.addEventListener("change", (e) => {
+              f = e.srcElement.valueAsNumber;
+              console.log(f);
+              osc.frequency.value = f;
+              fval.value = f;
+            });
+            speed.addEventListener("change", (e) => {
+              s = e.srcElement.valueAsNumber;
+              tempo = s;
+              if(fwtempo > tempo) {
+                fwtempo = tempo;
+                farnsworth.value = tempo;
+                fwval.value = tempo;
+              }
+              ditTime = 60.0/(tempo*10);
+              dahTime = 3 * ditTime;
+              elementSpaceTime = ditTime;
+              sval.value = tempo;
+            });
+            farnsworth.addEventListener("change", (e) => {
+              s = e.srcElement.valueAsNumber;
+              fwtempo = s;
+              if(fwtempo > tempo) {
+                fwtempo = tempo;
+                farnsworth.value = tempo;
+              }
+              characterSpaceTime = 3 * (60.0/(fwtempo*10));
+              wordSpaceTime = 7 * (60.0/(fwtempo*10));
+              fwval.value = fwtempo;
             });
 
         </script>
