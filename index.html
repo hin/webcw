@@ -9,7 +9,7 @@
       <p>
         <textarea rows="10" cols="80"
             id="input"
-            placeholder="Type here..."></textarea> </p>
+            placeholder="Type here..."></textarea><br/><button id="send">SEND</button><button id="clear">CLEAR</button></p>
         <table width="700px">
           <tr>
             <td>Frequency:</td>
@@ -101,6 +101,8 @@
             amp.gain.linearRampToValueAtTime(1e-6, audio.currentTime + 5);
 */
             input = document.getElementById("input");
+            send = document.getElementById("send");
+            clear = document.getElementById("clear");
             freq = document.getElementById("freq");
             fval = document.getElementById("fval");
             speed = document.getElementById("speed");
@@ -166,10 +168,19 @@
             }
 
             sched.start(timer);
-
+            send.addEventListener("click", (e) => {
+              text = input.value;
+              for(i in text) {
+                morseQueue.push(text[i].toUpperCase());
+              }
+            });
+            clear.addEventListener("click", (e) => {
+              input.value = "";
+            });
             input.addEventListener("keypress", (e) => {
                 morseQueue.push(e.key.toUpperCase());
             });
+
             freq.addEventListener("change", (e) => {
               f = e.srcElement.valueAsNumber;
               console.log(f);
