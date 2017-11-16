@@ -9,7 +9,12 @@
       <p>
         <textarea rows="10" cols="80"
             id="input"
-            placeholder="Type here..."></textarea><br/><button id="send">SEND</button><button id="clear">CLEAR</button></p>
+            placeholder="Type here..."></textarea><br/>
+        <progress id="progress" min="0" max="100" value="0" style="width: 660px;"></progress><br />
+        <button id="send">SEND</button>
+        <button id="stop">STOP</button>
+        <button id="clear">CLEAR</button>
+      </p>
         <table width="700px">
           <tr>
             <td>Frequency:</td>
@@ -101,7 +106,9 @@
             amp.gain.linearRampToValueAtTime(1e-6, audio.currentTime + 5);
 */
             input = document.getElementById("input");
+            progress = document.getElementById("progress");
             send = document.getElementById("send");
+            stop = document.getElementById("stop");
             clear = document.getElementById("clear");
             freq = document.getElementById("freq");
             fval = document.getElementById("fval");
@@ -131,6 +138,7 @@
             var wordSpaceTime = 7 * ditTime;
             var rampUpTime = 0.005;
             var rampDownTime = 0.005;
+            var pstep = 0;
 
             function timer(e) {
                 var t = e.playbackTime;
@@ -165,15 +173,25 @@
                 }
                 t += characterSpaceTime;
                 sched.insert(t, timer);
+                if (pstep > 0) {
+                  progress.value = (progress.value + pstep);
+                }
             }
 
             sched.start(timer);
             send.addEventListener("click", (e) => {
               text = input.value;
+              pstep = 100/text.length;
+              progress.value = 0;
               for(i in text) {
                 morseQueue.push(text[i].toUpperCase());
               }
             });
+            stop.addEventListener("click", (e) => {
+              morseQueue.length = 0;
+              pstep = 0;
+              progress.value = 0;
+            })
             clear.addEventListener("click", (e) => {
               input.value = "";
             });
